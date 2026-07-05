@@ -1,5 +1,11 @@
 export type RootStackParamList = {
   Home: undefined;
+  AlphabetGrid: undefined;
+  LearnLetter: { letter?: string } | undefined;
+  FindLetter: undefined;
+  LetterMatch: undefined;
+  Progress: undefined;
+  Settings: undefined;
   CategoryHub: undefined;
   LevelSelect: { categoryId: string };
   Activity: { categoryId: string; level: 1 | 2 | 3 | 4 };
@@ -7,7 +13,6 @@ export type RootStackParamList = {
   Routines: undefined;
   RoutineDetail: { routineId: string };
   ParentDashboard: undefined;
-  Settings: undefined;
   BonusGames: undefined;
   OddOneOut: undefined;
   FindColour: undefined;
