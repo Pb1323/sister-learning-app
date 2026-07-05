@@ -3,64 +3,67 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useSettings } from '../context/SettingsContext';
-import BigButton from '../components/BigButton';
-import { Settings } from '../utils/storage';
+import { playCorrectSound } from '../utils/music';
+import { BouncyCard, HomePill, MagicWorld, magic } from '../components/AlphabetUI';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
-const sizes: { key: Settings['buttonSize']; label: string }[] = [
-  { key: 'medium', label: 'Medium' },
-  { key: 'large', label: 'Large' },
-  { key: 'extraLarge', label: 'Extra Large' },
-];
-
 export default function SettingsScreen({ navigation }: Props) {
   const { settings, updateSettings } = useSettings();
-
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>⚙️ Settings</Text>
+    <MagicWorld reducedMotion={settings.reducedMotion} tint="#d9f8ff">
+      <SafeAreaView style={styles.safe}>
+        <HomePill onPress={() => navigation.navigate('Home')} />
+        <Text style={styles.title}>Grown-up Settings</Text>
+        <View style={styles.panel}>
+          <View style={styles.sectionCard}>
+            <Text style={styles.section}>Audio</Text>
+            <Text style={styles.sectionHelp}>Voice and music have their own big buttons with extra space so they are easy to tap.</Text>
+            <View style={styles.audioStack}>
+              <Toggle label="Voice sounds" on={settings.soundOn} onPress={() => updateSettings({ soundOn: !settings.soundOn })} />
+              <Toggle label="Calm music" on={settings.musicOn} onPress={() => updateSettings({ musicOn: !settings.musicOn })} />
+            </View>
+            <BouncyCard reducedMotion={settings.reducedMotion} onPress={playCorrectSound} style={styles.testSound}>
+              <Text style={styles.testSoundText}>✨ Try a gentle chime</Text>
+            </BouncyCard>
+          </View>
 
-      <Text style={styles.section}>Sound</Text>
-      <View style={styles.row}>
-        <BigButton
-          label="On 🔊"
-          emoji=""
-          color={settings.soundOn ? '#43a047' : '#b0bec5'}
-          size={100}
-          onPress={() => updateSettings({ soundOn: true })}
-        />
-        <BigButton
-          label="Off 🔇"
-          emoji=""
-          color={!settings.soundOn ? '#43a047' : '#b0bec5'}
-          size={100}
-          onPress={() => updateSettings({ soundOn: false })}
-        />
-      </View>
+          <View style={styles.sectionCard}>
+            <Text style={styles.section}>Comfort</Text>
+            <Toggle label="Reduced motion" on={settings.reducedMotion} onPress={() => updateSettings({ reducedMotion: !settings.reducedMotion })} />
+          </View>
 
-      <Text style={styles.section}>Button Size</Text>
-      <View style={styles.row}>
-        {sizes.map((s) => (
-          <BigButton
-            key={s.key}
-            label={s.label}
-            emoji=""
-            color={settings.buttonSize === s.key ? '#43a047' : '#b0bec5'}
-            size={100}
-            onPress={() => updateSettings({ buttonSize: s.key })}
-          />
-        ))}
-      </View>
+          <View style={styles.sectionCard}>
+            <Text style={styles.section}>Find Letter choices</Text>
+            <View style={styles.row}>{([2, 3, 4] as const).map((n) => <BouncyCard key={n} reducedMotion={settings.reducedMotion} onPress={() => updateSettings({ difficulty: n })} style={[styles.choice, settings.difficulty === n && styles.active]}><Text style={styles.choiceText}>{n}</Text></BouncyCard>)}</View>
+          </View>
 
-      <BigButton label="Back" emoji="🏠" color="#78909c" size={80} onPress={() => navigation.navigate('Home')} />
-    </SafeAreaView>
+          <Text style={styles.note}>Audio uses speech plus safe web chimes when available. If a browser blocks audio, the app keeps working.</Text>
+        </View>
+      </SafeAreaView>
+    </MagicWorld>
   );
 }
 
+function Toggle({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
+  return <BouncyCard onPress={onPress} style={[styles.toggle, { backgroundColor: on ? magic.green : '#8fa0ad' }]}><Text style={styles.toggleText}>{on ? '✅' : '⬜'} {label}</Text></BouncyCard>;
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5', alignItems: 'center', paddingTop: 16 },
-  title: { fontSize: 24, fontWeight: '800', marginBottom: 12, color: '#37474f' },
-  section: { fontSize: 18, fontWeight: '700', color: '#37474f', marginTop: 12, marginBottom: 4 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+  safe: { flex: 1, padding: 18, alignItems: 'center' },
+  title: { fontSize: 40, lineHeight: 46, fontWeight: '900', color: magic.ink, marginVertical: 18, textAlign: 'center' },
+  panel: { width: '100%', maxWidth: 640, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 40, borderWidth: 7, borderColor: '#fff', padding: 16, gap: 18, shadowColor: '#39426b', shadowOpacity: 0.16, shadowRadius: 14, elevation: 7 },
+  sectionCard: { borderRadius: 30, backgroundColor: 'rgba(255,248,217,0.72)', borderWidth: 4, borderColor: '#fff', padding: 14, gap: 12 },
+  section: { fontSize: 27, fontWeight: '900', color: magic.ink, textAlign: 'center' },
+  sectionHelp: { fontSize: 17, lineHeight: 23, fontWeight: '800', color: '#607080', textAlign: 'center' },
+  audioStack: { gap: 16 },
+  toggle: { minHeight: 78, borderRadius: 30, alignItems: 'center', justifyContent: 'center', padding: 12, borderWidth: 4, borderColor: '#fff' },
+  toggleText: { fontSize: 24, lineHeight: 30, color: '#fff', fontWeight: '900', textAlign: 'center' },
+  testSound: { minHeight: 62, borderRadius: 30, backgroundColor: magic.purple, borderWidth: 4, borderColor: '#fff', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14 },
+  testSoundText: { fontSize: 21, lineHeight: 26, color: '#fff', fontWeight: '900', textAlign: 'center' },
+  row: { flexDirection: 'row', justifyContent: 'center', gap: 14 },
+  choice: { width: 88, height: 78, borderRadius: 26, backgroundColor: '#d9e2ea', alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: '#fff' },
+  active: { backgroundColor: magic.yellow },
+  choiceText: { fontSize: 32, fontWeight: '900', color: magic.ink },
+  note: { fontSize: 18, lineHeight: 24, fontWeight: '800', color: '#607080', textAlign: 'center' },
 });
