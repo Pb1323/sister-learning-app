@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Settings, defaultSettings, getSettings, saveSettings } from '../utils/storage';
 import { setSpeechEnabled } from '../utils/speech';
+import { setMusicEnabled } from '../utils/music';
 
 interface SettingsContextValue {
   settings: Settings;
@@ -21,6 +22,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     getSettings().then((s) => {
       setSettings(s);
       setSpeechEnabled(s.soundOn);
+      setMusicEnabled(s.musicOn);
     });
   }, []);
 
@@ -29,6 +31,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const next = { ...prev, ...partial };
       saveSettings(next);
       setSpeechEnabled(next.soundOn);
+      setMusicEnabled(next.musicOn);
       return next;
     });
   };

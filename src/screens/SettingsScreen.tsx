@@ -3,64 +3,9 @@ import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useSettings } from '../context/SettingsContext';
-import BigButton from '../components/BigButton';
-import { Settings } from '../utils/storage';
+import { BouncyCard, HomePill, Sky } from '../components/AlphabetUI';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
-
-const sizes: { key: Settings['buttonSize']; label: string }[] = [
-  { key: 'medium', label: 'Medium' },
-  { key: 'large', label: 'Large' },
-  { key: 'extraLarge', label: 'Extra Large' },
-];
-
-export default function SettingsScreen({ navigation }: Props) {
-  const { settings, updateSettings } = useSettings();
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>⚙️ Settings</Text>
-
-      <Text style={styles.section}>Sound</Text>
-      <View style={styles.row}>
-        <BigButton
-          label="On 🔊"
-          emoji=""
-          color={settings.soundOn ? '#43a047' : '#b0bec5'}
-          size={100}
-          onPress={() => updateSettings({ soundOn: true })}
-        />
-        <BigButton
-          label="Off 🔇"
-          emoji=""
-          color={!settings.soundOn ? '#43a047' : '#b0bec5'}
-          size={100}
-          onPress={() => updateSettings({ soundOn: false })}
-        />
-      </View>
-
-      <Text style={styles.section}>Button Size</Text>
-      <View style={styles.row}>
-        {sizes.map((s) => (
-          <BigButton
-            key={s.key}
-            label={s.label}
-            emoji=""
-            color={settings.buttonSize === s.key ? '#43a047' : '#b0bec5'}
-            size={100}
-            onPress={() => updateSettings({ buttonSize: s.key })}
-          />
-        ))}
-      </View>
-
-      <BigButton label="Back" emoji="🏠" color="#78909c" size={80} onPress={() => navigation.navigate('Home')} />
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5', alignItems: 'center', paddingTop: 16 },
-  title: { fontSize: 24, fontWeight: '800', marginBottom: 12, color: '#37474f' },
-  section: { fontSize: 18, fontWeight: '700', color: '#37474f', marginTop: 12, marginBottom: 4 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
-});
+export default function SettingsScreen({ navigation }: Props) { const { settings, updateSettings } = useSettings(); return <Sky><SafeAreaView style={styles.safe}><HomePill onPress={() => navigation.navigate('Home')} /><Text style={styles.title}>Settings</Text><View style={styles.panel}><Toggle label="Voice sounds" on={settings.soundOn} onPress={() => updateSettings({ soundOn: !settings.soundOn })} /><Toggle label="Gentle music" on={settings.musicOn} onPress={() => updateSettings({ musicOn: !settings.musicOn })} /><Text style={styles.section}>Find choices</Text><View style={styles.row}>{([2,3,4] as const).map((n) => <BouncyCard key={n} onPress={() => updateSettings({ difficulty: n })} style={[styles.choice, settings.difficulty === n && styles.active]}><Text style={styles.choiceText}>{n}</Text></BouncyCard>)}</View><Text style={styles.note}>Music is a quiet app-ready toggle. If device audio is unavailable, learning still works.</Text></View></SafeAreaView></Sky>; }
+function Toggle({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) { return <BouncyCard onPress={onPress} style={[styles.toggle, { backgroundColor: on ? '#32c96d' : '#9aa8b4' }]}><Text style={styles.toggleText}>{on ? '🔊' : '🔇'} {label}: {on ? 'On' : 'Off'}</Text></BouncyCard>; }
+const styles = StyleSheet.create({ safe: { flex: 1, padding: 18, alignItems: 'center' }, title: { fontSize: 48, fontWeight: '900', color: '#23364a', margin: 18 }, panel: { width: '100%', maxWidth: 560, backgroundColor: '#fff', borderRadius: 36, padding: 22, gap: 14 }, toggle: { minHeight: 76, borderRadius: 26, alignItems: 'center', justifyContent: 'center', padding: 12 }, toggleText: { fontSize: 23, color: '#fff', fontWeight: '900', textAlign: 'center' }, section: { fontSize: 26, fontWeight: '900', color: '#31546b', textAlign: 'center' }, row: { flexDirection: 'row', justifyContent: 'center', gap: 12 }, choice: { width: 82, height: 72, borderRadius: 24, backgroundColor: '#d9e2ea', alignItems: 'center', justifyContent: 'center' }, active: { backgroundColor: '#ffbf2f' }, choiceText: { fontSize: 30, fontWeight: '900', color: '#23364a' }, note: { fontSize: 18, fontWeight: '700', color: '#607080', textAlign: 'center' } });
